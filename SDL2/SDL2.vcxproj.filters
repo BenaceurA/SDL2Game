@@ -124,8 +124,5 @@
     <None Include="shader.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shader.geo">
-      <Filter>Shaders</Filter>
-    </None>
   </ItemGroup>
 </Project>

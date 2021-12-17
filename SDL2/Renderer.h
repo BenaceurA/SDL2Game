@@ -8,19 +8,29 @@
 
 class Renderer
 {
+	struct quadPool
+	{
+		Quad tileQuad{ 1.0f,1.0f };
+		Quad bigQuad{ 1.0f,2.0f };
+	};
+
 public:
-	static void init();
-	static void destroy();
-	static void setClearColor(float r, float g , float b , float a);
-	static void clear();
-	static void drawQuad(glm::vec2 position, glm::vec2 size, glm::vec4 color);
-	static void Swap();
-	static ShaderProgram* activeShader; //temporary
-private:	
-	static Quad quad;
-	static void drawArrays(GLsizei n);	
-	static SDL_GLContext GLContext;
-	static GLBufferManager* bufferManager;
+
+	quadPool* quads;
+	static Renderer* createInstance();
+	static Renderer* getInstance();
+	void init();
+	void destroy();
+	void setClearColor(float r, float g , float b , float a);
+	void clear();
+	void drawQuad(const Quad* quad,glm::vec2 position, glm::vec4 color);
+	void Swap();
+	ShaderProgram* activeShader; //temporary
+
+private:
+	static Renderer* renderer;	
+	void drawArrays(GLsizei n);	
+	SDL_GLContext GLContext;
 
 };
 

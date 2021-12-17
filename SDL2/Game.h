@@ -1,5 +1,6 @@
 #pragma once
 #include "GameState.h"
+#include "Renderer.h"
 
 class Game
 {
@@ -11,5 +12,6 @@ public:
 	void destroy();
 private:
 	static Game* game;
+	Renderer* renderer;
 	GameState state;
 };

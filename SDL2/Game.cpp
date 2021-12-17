@@ -23,16 +23,16 @@ Game* Game::getInstance()
 }
 
 void Game::init() {
-	
+	renderer = Renderer::createInstance();
 	Window::init({1600,600}); // 1600 by 600 resolution window
-	Renderer::init();
+	renderer->init();
 	Input::init(&state);
-	Renderer::setClearColor(0.f, 0.f, 0.f, 1.f);
+	renderer->setClearColor(0.f, 0.f, 0.f, 1.f);
 }
 
 void Game::destroy() {
 	Window::destroy();
-	Renderer::destroy();
+	renderer->destroy();
 	SDL_Quit();
 }
 
@@ -46,7 +46,7 @@ void Game::run()
 	
 	shader.setMat4("projection", camera.getProjection());
 
-	Renderer::activeShader = &shader; //give renderer the ability to change uniforms
+	renderer->activeShader = &shader; //give renderer the ability to change uniforms
 	while (state.running)
 	{
 		Input::pollEvents();
@@ -64,16 +64,16 @@ void Game::run()
 				state.running = false;
 
 			if (Input::isKeyPressed(Key::RIGHT))
-				camera.position.x += 0.05;
+				camera.position.x += 0.05f;
 
 			if (Input::isKeyPressed(Key::LEFT))
-				camera.position.x -= 0.05;
+				camera.position.x -= 0.05f;
 
 			if (Input::isKeyPressed(Key::UP))
-				camera.position.y += 0.05;
+				camera.position.y += 0.05f;
 
 			if (Input::isKeyPressed(Key::DOWN))
-				camera.position.y -= 0.05;
+				camera.position.y -= 0.05f;
 		}
 		
 		shader.setMat4("view", camera.getView());
@@ -83,14 +83,23 @@ void Game::run()
 		//********************************
 
 		//CLEAR CANVAS
-		Renderer::clear();
+		renderer->clear();
 		
-		//DRAW START
+		Quad* tq = &renderer->quads->tileQuad;
+		Quad* bq = &renderer->quads->bigQuad;
 
-		Renderer::drawQuad(glm::vec2(0, 0), glm::vec4(1.0f, 1.0f, 0.f, 1.f));
+		//DRAW START
+		for (size_t i = 0; i <= 10; i++)
+		{
+			for (size_t j = 0; j <= 10; j++)
+			{
+				renderer->drawQuad(tq,glm::vec2(i,j), glm::vec4(0.1f, 0.9f, 0.f, 1.f));
+			}
+		}
+		renderer->drawQuad(bq, glm::vec2(camera.position.x, camera.position.y), glm::vec4(1.f, 1.0f,1.f, 1.f));
 		//DRAW END
 
 		//SWAP THE CANVAS
-		Renderer::Swap();	
+		renderer->Swap();
 	}
 }

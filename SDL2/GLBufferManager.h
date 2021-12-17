@@ -7,11 +7,12 @@
 class GLBufferManager
 {
 public:
-	GLBufferManager();
+	GLBufferManager(const std::vector<float>& vertices);
 	~GLBufferManager();
-
+	void bind() const;
+	void unbind() const;
 private:
-	VertexArrayObject vao; //generate vao and binds it
-	VertexBufferObject vbo; //generate vbo and init it with inVertices
+	unsigned int _vao;
+	unsigned int _vbo;
 };
 

@@ -2,9 +2,21 @@
 #include <stdexcept>
 #include "Window.h"
 #include <glm/gtc/matrix_transform.hpp>
-SDL_GLContext Renderer::GLContext = nullptr;
-GLBufferManager* Renderer::bufferManager = nullptr;
-ShaderProgram* Renderer::activeShader = nullptr;
+
+Renderer* Renderer::renderer = nullptr;
+Renderer* Renderer::createInstance()
+{
+	if (renderer != nullptr)
+	{
+		return nullptr;
+	}
+	renderer = new Renderer();
+	return renderer;
+}
+
+Renderer* Renderer::getInstance() {
+	return renderer;
+}
 
 void Renderer::init()
 {
@@ -21,13 +33,13 @@ void Renderer::init()
 		throw std::runtime_error("failed to create context!");
 	}
 	gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
-	bufferManager = new GLBufferManager();
+	quads = new quadPool();
 	glViewport(0, 0, (int)Window::resolution.x, (int)Window::resolution.y);
 }
 
 void Renderer::destroy()
 {
-	delete bufferManager;
+	delete quads;
 	SDL_GL_DeleteContext(GLContext);
 }
 
@@ -41,14 +53,16 @@ void Renderer::clear()
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Renderer::drawQuad(glm::vec2 position,glm::vec2 size, glm::vec4 color)
+void Renderer::drawQuad(const Quad* quad, glm::vec2 position, glm::vec4 color)
 { 
-	//u set the position and color in the shader before drawing
+	quad->bind();
 	activeShader->setVec4("color",color); //color
+	activeShader->setBool("hasTexture", false); //hasTexture
 	glm::mat4 m(1);
 	m = glm::translate(m, glm::vec3(position, 0.0));
 	activeShader->setMat4("model",m); //position
 	drawArrays(6);
+	quad->unbind();
 }
 
 void Renderer::Swap()
