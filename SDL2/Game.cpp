@@ -38,15 +38,9 @@ void Game::destroy() {
 
 void Game::run()
 {
-	//set a camera
 	Camera camera{ {0.0f,0.0f},Window::resolution.x / Window::resolution.y,1.0f };
-	//set a shader before doing draw calls
-	ShaderProgram shader("shader.vert", "shader.frag");
-	shader.Use();
-	
-	shader.setMat4("projection", camera.getProjection());
-
-	renderer->activeShader = &shader; //give renderer the ability to change uniforms
+	const ShaderProgram* shader = renderer->getShader();
+	shader->setMat4("projection", camera.getProjection());
 	while (state.running)
 	{
 		Input::pollEvents();
@@ -76,7 +70,7 @@ void Game::run()
 				camera.position.y -= 0.05f;
 		}
 		
-		shader.setMat4("view", camera.getView());
+		shader->setMat4("view", camera.getView());
 
 		//********************************
 		//************DRAWING*************

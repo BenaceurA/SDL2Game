@@ -23,17 +23,21 @@ void Renderer::init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
 	if (Window::window == nullptr)
-	{
 		throw std::runtime_error("window was nullptr!");
-	}
 	GLContext = SDL_GL_CreateContext(Window::window);
 	if (GLContext == NULL)
-	{
 		throw std::runtime_error("failed to create context!");
-	}
+
+	//****LOAD OPENGL FUNCTIONS*****
 	gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
-	quads = new quadPool();
+
+	activeShader = new ShaderProgram( "shader.vert", "shader.frag" );
+	activeShader->Use();
+
+	quads = new QuadContainer();
+
 	glViewport(0, 0, (int)Window::resolution.x, (int)Window::resolution.y);
 }
 
@@ -46,6 +50,11 @@ void Renderer::destroy()
 void Renderer::setClearColor(float r, float g, float b, float a)
 {
 	glClearColor(r, g, b, a);
+}
+
+const ShaderProgram* Renderer::getShader()
+{
+	return activeShader;
 }
 
 void Renderer::clear()
