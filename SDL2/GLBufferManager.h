@@ -1,6 +1,5 @@
 #pragma once
-#include "VertexArrayObject.h"
-#include "VertexBufferObject.h"
+#include <vector>
 
 //we never unbind this, its bound and it stays
 
