@@ -9,7 +9,6 @@ public:
 	void unbind() const;
 	float getWidth();
 	float getHeight();
-
 private:
 	Quad(float width, float height);
 	Quad(const Quad& quad) = delete;

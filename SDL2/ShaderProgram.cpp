@@ -55,7 +55,11 @@ ShaderProgram::ShaderProgram(const char* vFilename, const char* fFilename)
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
-		throw std::runtime_error("failed to compile fragment shader!");
+		GLsizei logLength;
+		GLchar  log[1024];
+		glGetShaderInfoLog(fragmentShader, sizeof(log), &logLength, log);
+		std::string loginfo(log, logLength);
+		throw std::runtime_error("failed to compile fragment shader : " +loginfo);
 	}
 
 	id = glCreateProgram();
@@ -80,7 +84,7 @@ ShaderProgram::~ShaderProgram()
 	glDeleteProgram(id);
 }
 
-void ShaderProgram::Use()
+void ShaderProgram::Use() const
 {
 	glUseProgram(id);
 }

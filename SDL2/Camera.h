@@ -1,18 +1,18 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include "Inputtable.h"
 
-class Camera
+class Camera : Inputtable
 {
-private:
-	float zoom;
-	void correctZoom();
 public:
-	Camera(glm::vec2 position, float aspect,float zoom);
+	Camera(glm::vec2 position, float aspect, float zoom);
 	glm::vec2 position;
-	float aspect;
-	void setZoom(float zoom);
-	float getZoom();
-	glm::mat4 getView();
 	glm::mat4 getProjection();
+private:
+	float width;
+	float height;
+	float aspect;
+	float zoom;
+	virtual void inputCallBack() override;
 };

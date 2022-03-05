@@ -2,6 +2,9 @@
 #include <stdexcept>
 #include "Window.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <array>
+#include "Exception.h"
+
 
 Renderer* Renderer::renderer = nullptr;
 Renderer* Renderer::createInstance()
@@ -33,17 +36,30 @@ void Renderer::init()
 	//****LOAD OPENGL FUNCTIONS*****
 	gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
 
-	activeShader = new ShaderProgram( "shader.vert", "shader.frag" );
+	initText();
+
+	//Camera and Shader shouldn't be created here.
+	activeCamera = new Camera{ {0.0f,0.0f},Window::resolution.x / Window::resolution.y,0.0f }; 
+	activeShader = new ShaderProgram{ "shader.vert", "shader.frag" };
+
 	activeShader->Use();
+	activeShader->setMat4("projection", activeCamera->getProjection());
 
 	quads = new QuadContainer();
 
 	glViewport(0, 0, (int)Window::resolution.x, (int)Window::resolution.y);
 }
 
+void Renderer::initText() {
+	gltInit();
+}
+
 void Renderer::destroy()
 {
+	delete activeCamera;
+	delete activeShader;
 	delete quads;
+	gltTerminate();
 	SDL_GL_DeleteContext(GLContext);
 }
 
@@ -64,14 +80,89 @@ void Renderer::clear()
 
 void Renderer::drawQuad(const Quad* quad, glm::vec2 position, glm::vec4 color)
 { 
+	activeShader->Use();
 	quad->bind();
 	activeShader->setVec4("color",color); //color
 	activeShader->setBool("hasTexture", false); //hasTexture
 	glm::mat4 m(1);
 	m = glm::translate(m, glm::vec3(position, 0.0));
 	activeShader->setMat4("model",m); //position
+	activeShader->setMat4("view", activeCamera->getView());
 	drawArrays(6);
 	quad->unbind();
+}
+
+void Renderer::drawQuad(const Quad* quad, glm::vec2 position, Texture* texture)
+{
+	activeShader->Use();
+	quad->bind();
+	texture->bind(0);
+	activeShader->setInt("texture01", 0);
+	activeShader->setBool("hasTexture", true); //hasTexture
+	glm::mat4 m(1);
+	m = glm::translate(m, glm::vec3(position, 0.0));
+	activeShader->setMat4("model", m); //position
+	/*activeShader->setMat4("view", activeCamera->getView());*/
+	drawArrays(6);
+	quad->unbind();
+}
+
+
+
+void Renderer::drawQuadInstanced(const Quad* quad, glm::vec2* positions, glm::vec4 color, int count)
+{
+
+}
+
+//this creates GLText every time u call it, prefer using the other version and pass in GLText
+void Renderer::drawText(const char* text, glm::vec2 position, glm::vec4 color, float scale,bool screenCoord)
+{
+	
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLTtext* Text = gltCreateText();
+	gltSetText(Text, text);
+	// Begin text drawing (this for instance calls glUseProgram)
+	gltBeginDraw();
+
+	// Draw any amount of text between begin and end
+	gltColor(color.r, color.g, color.b, color.a);
+	if (screenCoord)
+	{
+		gltDrawText2D(Text, position.x, position.y, scale);
+	}
+	else {
+		gltDrawText2D(Text, (position.x + 1) * 0.5f * Window::resolution.x, (-position.y + 1) * 0.5f * Window::resolution.y, scale);
+	}
+	
+	// Finish drawing text
+	gltEndDraw();
+	gltDeleteText(Text);
+}
+
+void Renderer::drawText(GLTtext* text, glm::vec2 position, glm::vec4 color, float scale, bool screenCoord)
+{
+	//GLTtext shouldn't be created every frame
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Begin text drawing (this for instance calls glUseProgram)
+	gltBeginDraw();
+
+	// Draw any amount of text between begin and end
+	gltColor(color.r, color.g, color.b, color.a);
+	if (screenCoord)
+	{
+		gltDrawText2D(text, position.x, position.y, scale);
+	}
+	else {
+		gltDrawText2D(text, (position.x + 1) * 0.5f * Window::resolution.x, (-position.y + 1) * 0.5f * Window::resolution.y, scale);
+	}
+
+	// Finish drawing text
+	gltEndDraw();
 }
 
 void Renderer::Swap()
@@ -81,5 +172,15 @@ void Renderer::Swap()
 
 void Renderer::drawArrays(GLsizei n)
 {
-	glDrawArrays(GL_TRIANGLES, 0, n);
+	glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
+}
+
+void Renderer::setCamera(Camera* camera)
+{
+	this->activeCamera = camera;
+}
+
+Camera* Renderer::getCamera()
+{
+	return this->activeCamera;
 }

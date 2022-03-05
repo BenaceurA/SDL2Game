@@ -40,12 +40,18 @@
     <Filter Include="Source Files\Input">
       <UniqueIdentifier>{4d3da97e-b62a-4586-971f-fa0b79b26e47}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Map">
+      <UniqueIdentifier>{a9f655e7-454e-4944-a9fd-3610d2747023}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Map">
+      <UniqueIdentifier>{3a1cdf4f-0b0f-476e-b64d-97ed67ab8be4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vendor">
+      <UniqueIdentifier>{c2a5cc5b-5d79-4e21-88ad-cbd562b190d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderProgram.cpp">
@@ -70,6 +76,18 @@
       <Filter>Source Files\Input</Filter>
     </ClCompile>
     <ClCompile Include="GLBufferManager.cpp">
+      <Filter>Source Files\Graphics\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Inputtable.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>Source Files\Graphics\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
       <Filter>Source Files\Graphics\OpenGL</Filter>
     </ClCompile>
   </ItemGroup>
@@ -103,6 +121,27 @@
     </ClInclude>
     <ClInclude Include="GLBufferManager.h">
       <Filter>Header Files\Graphics\OpengGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Inputtable.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="gltext.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="PerlinNoise.hpp">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>Header Files\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\Graphics\OpengGL</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Exception.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

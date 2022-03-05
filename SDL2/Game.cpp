@@ -4,6 +4,8 @@
 #include "Camera.h"
 #include "ShaderProgram.h"
 #include "Input.h"
+#include <iostream>
+#include "Map.h"
 
 Game* Game::game = nullptr;
 
@@ -24,7 +26,7 @@ Game* Game::getInstance()
 
 void Game::init() {
 	renderer = Renderer::createInstance();
-	Window::init({1600,600}); // 1600 by 600 resolution window
+	Window::init({1600,800}); // 1600 by 600 resolution window
 	renderer->init();
 	Input::init(&state);
 	renderer->setClearColor(0.f, 0.f, 0.f, 1.f);
@@ -38,39 +40,16 @@ void Game::destroy() {
 
 void Game::run()
 {
-	Camera camera{ {0.0f,0.0f},Window::resolution.x / Window::resolution.y,1.0f };
-	const ShaderProgram* shader = renderer->getShader();
-	shader->setMat4("projection", camera.getProjection());
+	//TEXT TESTING
+	GLTtext* text = gltCreateText();
+
+	Map map(24, 24);
+	map.generateHeightMap();
 	while (state.running)
 	{
-		Input::pollEvents();
+		Input::pollEvents(); // polls events and updates the input state
+		Input::resolveCallBacks(); // call all registred callbacks and executes based on the input state
 
-		if (Input::isKeyPressed(Key::LSHIFT))
-		{
-			if (Input::isKeyPressed(Key::UP))
-				camera.setZoom(camera.getZoom() + 0.1f);
-
-			if (Input::isKeyPressed(Key::DOWN))
-				camera.setZoom(camera.getZoom() - 0.1f);
-		}
-		else {
-			if (Input::isKeyPressed(Key::ESCAPE))
-				state.running = false;
-
-			if (Input::isKeyPressed(Key::RIGHT))
-				camera.position.x += 0.05f;
-
-			if (Input::isKeyPressed(Key::LEFT))
-				camera.position.x -= 0.05f;
-
-			if (Input::isKeyPressed(Key::UP))
-				camera.position.y += 0.05f;
-
-			if (Input::isKeyPressed(Key::DOWN))
-				camera.position.y -= 0.05f;
-		}
-		
-		shader->setMat4("view", camera.getView());
 
 		//********************************
 		//************DRAWING*************
@@ -78,22 +57,20 @@ void Game::run()
 
 		//CLEAR CANVAS
 		renderer->clear();
-		
+
+
 		Quad* tq = &renderer->quads->tileQuad;
 		Quad* bq = &renderer->quads->bigQuad;
 
 		//DRAW START
-		for (size_t i = 0; i <= 10; i++)
-		{
-			for (size_t j = 0; j <= 10; j++)
-			{
-				renderer->drawQuad(tq,glm::vec2(i,j), glm::vec4(0.1f, 0.9f, 0.f, 1.f));
-			}
-		}
-		renderer->drawQuad(bq, glm::vec2(camera.position.x, camera.position.y), glm::vec4(1.f, 1.0f,1.f, 1.f));
-		//DRAW END
+		int DrawCount = 0;
 
+		gltSetText(text,std::to_string(DrawCount).c_str());
+		renderer->drawText(text, glm::vec2(0, 0), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
+		
 		//SWAP THE CANVAS
 		renderer->Swap();
 	}
+
+	gltDeleteText(text);
 }

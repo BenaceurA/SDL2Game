@@ -8,7 +8,6 @@ int main(int argc, char* args[]) try {
 	{
 		return 1;
 	}
-
 	game->init();
 	game->run();
 	game->destroy();
