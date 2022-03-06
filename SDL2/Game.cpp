@@ -63,10 +63,62 @@ void Game::run()
 		Quad* bq = &renderer->quads->bigQuad;
 
 		//DRAW START
-		int DrawCount = 0;
+		
+		//testing : we assume the quad being drawn will be at position 0,0
+		
+		//get screenX and screenY of the quad being drawn
+		//by getting the world position then multiply by view and proj and devide by W
 
-		gltSetText(text,std::to_string(DrawCount).c_str());
-		renderer->drawText(text, glm::vec2(0, 0), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
+		//Default positions of the quad
+		glm::vec2 positions[4];
+		positions[0] = {0.0f,0.0f};							//bottom left
+		positions[1] = {tq->getWidth(),0.0f};				//bottom right
+		positions[2] = {tq->getWidth(),tq->getHeight()};	//top right
+		positions[3] = {0.0f,tq->getWidth()};				//top left
+
+		//for each default position of the quad we will calculate it's screen coords
+		glm::vec4 screenPos[4];
+		for (size_t i = 0; i < 4; i++)
+		{
+			screenPos[i] = renderer->getCamera()->getProjection() * renderer->getCamera()->getView() * glm::vec4(positions[i], 0.0, 1.0);
+			screenPos[i] /= screenPos[i].w;
+		}
+
+		//draw the quad	
+		//only draw the quad if at least 1 screenPos.x is less then 1 and bigger than -1
+		//OR at least 1 screenPos.y is less then 1 and bigget than -1
+
+		bool xAxisHidden = true;
+		bool yAxisHidden = true;
+		for (size_t i = 0; i < 4; i++)
+		{
+			if (screenPos[i].x > -1.0f && screenPos[i].x < 1.0f)
+			{
+				xAxisHidden = false;
+				break;
+			}
+		}
+		for (size_t i = 0; i < 4; i++)
+		{
+			if (screenPos[i].y > -1.0f && screenPos[i].y < 1.0f)
+			{
+				yAxisHidden = false;
+				break;
+			}
+		}
+		if (!xAxisHidden && !yAxisHidden)
+		{
+			renderer->drawQuad(tq, { 0.0f,0.0f }, { 1.0,0.0,0.0,1.0 });
+			gltSetText(text,std::string("DRAWING").c_str());
+			renderer->drawText(text, glm::vec2(0, 80), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
+		}
+
+		//draw the text
+		for (size_t i = 0; i < 4; i++)
+		{
+			gltSetText(text, (std::to_string(screenPos[i].x) + std::string(",") + std::to_string(screenPos[i].y)).c_str());
+			renderer->drawText(text, glm::vec2(0, 20*i), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
+		}
 		
 		//SWAP THE CANVAS
 		renderer->Swap();
@@ -74,3 +126,4 @@ void Game::run()
 
 	gltDeleteText(text);
 }
+
