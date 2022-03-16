@@ -43,7 +43,9 @@ void Game::run()
 	//TEXT TESTING
 	GLTtext* text = gltCreateText();
 
-	Map map(24, 24);
+	const int mapWidth = 10;
+	const int mapHeight = 10;
+	Map map(mapWidth, mapHeight);
 	map.generateHeightMap();
 	while (state.running)
 	{
@@ -58,68 +60,65 @@ void Game::run()
 		//CLEAR CANVAS
 		renderer->clear();
 
-
 		Quad* tq = &renderer->quads->tileQuad;
 		Quad* bq = &renderer->quads->bigQuad;
 
 		//DRAW START
 		
-		//testing : we assume the quad being drawn will be at position 0,0
-		
-		//get screenX and screenY of the quad being drawn
-		//by getting the world position then multiply by view and proj and devide by W
-
-		//Default positions of the quad
-		glm::vec2 positions[4];
-		positions[0] = {0.0f,0.0f};							//bottom left
-		positions[1] = {tq->getWidth(),0.0f};				//bottom right
-		positions[2] = {tq->getWidth(),tq->getHeight()};	//top right
-		positions[3] = {0.0f,tq->getWidth()};				//top left
-
-		//for each default position of the quad we will calculate it's screen coords
-		glm::vec4 screenPos[4];
-		for (size_t i = 0; i < 4; i++)
+		int nDraw = 0;
+		std::vector<glm::vec2> positions;
+		//loop the map and get all the visible tile positions
+		for (float i = 0; i < mapWidth * tq->getWidth(); i+=tq->getWidth())
 		{
-			screenPos[i] = renderer->getCamera()->getProjection() * renderer->getCamera()->getView() * glm::vec4(positions[i], 0.0, 1.0);
-			screenPos[i] /= screenPos[i].w;
-		}
-
-		//draw the quad	
-		//only draw the quad if at least 1 screenPos.x is less then 1 and bigger than -1
-		//OR at least 1 screenPos.y is less then 1 and bigget than -1
-
-		bool xAxisHidden = true;
-		bool yAxisHidden = true;
-		for (size_t i = 0; i < 4; i++)
-		{
-			if (screenPos[i].x > -1.0f && screenPos[i].x < 1.0f)
+			for (float j = 0; j < mapHeight * tq->getHeight(); j+=tq->getHeight())
 			{
-				xAxisHidden = false;
-				break;
+				//get world vertex positions
+				glm::vec2 pos[4];
+				pos[0] = { i,j };
+				pos[1] = { i+tq->getWidth(),j };
+				pos[2] = { i+tq->getWidth(),j+tq->getHeight() };
+				pos[3] = { i,j+tq->getWidth() };
+
+				//tranform into screenPos
+				glm::vec4 screenPos[4];
+				for (size_t k = 0; k < 4; k++)
+				{
+					screenPos[k] = renderer->getCamera()->getProjection() * renderer->getCamera()->getView() * glm::vec4(pos[k], 0.0, 1.0);
+					screenPos[k] /= screenPos[k].w;
+				}
+
+				//check the quad is hidden
+				bool xAxisHidden = true;
+				bool yAxisHidden = true;
+				for (size_t l = 0; l < 4; l++)
+				{
+					if (screenPos[l].x > -1.0f && screenPos[l].x < 1.0f)
+					{
+						xAxisHidden = false;
+						break;
+					}
+				}
+				for (size_t l = 0; l < 4; l++)
+				{
+					if (screenPos[l].y > -1.0f && screenPos[l].y < 1.0f)
+					{
+						yAxisHidden = false;
+						break;
+					}
+				}
+				if (!xAxisHidden && !yAxisHidden)
+				{
+					positions.push_back({ i,j });
+					nDraw++;
+				}
 			}
 		}
-		for (size_t i = 0; i < 4; i++)
-		{
-			if (screenPos[i].y > -1.0f && screenPos[i].y < 1.0f)
-			{
-				yAxisHidden = false;
-				break;
-			}
-		}
-		if (!xAxisHidden && !yAxisHidden)
-		{
-			renderer->drawQuad(tq, { 0.0f,0.0f }, { 1.0,0.0,0.0,1.0 });
-			gltSetText(text,std::string("DRAWING").c_str());
-			renderer->drawText(text, glm::vec2(0, 80), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
-		}
+		renderer->drawQuadInstanced(tq, positions, { 1.0,1.0,0.0,1.0 },positions.size());
 
-		//draw the text
-		for (size_t i = 0; i < 4; i++)
-		{
-			gltSetText(text, (std::to_string(screenPos[i].x) + std::string(",") + std::to_string(screenPos[i].y)).c_str());
-			renderer->drawText(text, glm::vec2(0, 20*i), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
-		}
-		
+		//text draw
+		gltSetText(text, std::to_string(nDraw).c_str());
+		renderer->drawText(text, glm::vec2(0, 0), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
+
 		//SWAP THE CANVAS
 		renderer->Swap();
 	}

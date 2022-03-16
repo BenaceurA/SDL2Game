@@ -18,10 +18,6 @@ class Renderer
 		Quad bigQuad{ 2.0f,2.0f };
 	};
 
-	struct Plane {
-		float x, y, z, w;
-	}frustumPlanes[6];
-
 public:
 
 	static Renderer* createInstance();
@@ -33,7 +29,7 @@ public:
 	void clear();
 	void drawQuad(const Quad* quad, glm::vec2 position, glm::vec4 color);
 	void drawQuad(const Quad* quad, glm::vec2 position, Texture* texture);
-	void drawQuadInstanced(const Quad* quad,glm::vec2* positions, glm::vec4 color, int count);
+	void drawQuadInstanced(const Quad* quad, std::vector<glm::vec2> positions, glm::vec4 color, int instanceCount);
 	void drawText(const char* text, glm::vec2 position, glm::vec4 color ,float scale, bool screenCoord);
 	void drawText(GLTtext* text, glm::vec2 position, glm::vec4 color, float scale, bool screenCoord);
 	void Swap();
@@ -45,7 +41,8 @@ private:
 	static Renderer* renderer;
 	Camera* activeCamera;
 	ShaderProgram* activeShader;
-	void drawArrays(GLsizei n);	
+	void drawElements(GLsizei n);
+	void drawElementsInstanced(GLsizei count, GLsizei instancecount);
 	void initText();
 	SDL_GLContext GLContext;
 

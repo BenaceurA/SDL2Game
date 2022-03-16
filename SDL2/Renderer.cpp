@@ -83,12 +83,11 @@ void Renderer::drawQuad(const Quad* quad, glm::vec2 position, glm::vec4 color)
 	activeShader->Use();
 	quad->bind();
 	activeShader->setVec4("color",color); //color
-	activeShader->setBool("hasTexture", false); //hasTexture
 	glm::mat4 m(1);
 	m = glm::translate(m, glm::vec3(position, 0.0));
 	activeShader->setMat4("model",m); //position
 	activeShader->setMat4("view", activeCamera->getView());
-	drawArrays(6);
+	drawElements(6);
 	quad->unbind();
 }
 
@@ -102,16 +101,30 @@ void Renderer::drawQuad(const Quad* quad, glm::vec2 position, Texture* texture)
 	glm::mat4 m(1);
 	m = glm::translate(m, glm::vec3(position, 0.0));
 	activeShader->setMat4("model", m); //position
-	/*activeShader->setMat4("view", activeCamera->getView());*/
-	drawArrays(6);
+	activeShader->setMat4("view", activeCamera->getView());
+	drawElements(6);
 	quad->unbind();
 }
 
-
-
-void Renderer::drawQuadInstanced(const Quad* quad, glm::vec2* positions, glm::vec4 color, int count)
+void Renderer::drawQuadInstanced(const Quad* quad, std::vector<glm::vec2> positions, glm::vec4 color, int instanceCount)
 {
-
+	if (instanceCount>100)
+	{
+		throwRTExcept("instanceCount can't exceed 100 for now :)");
+	}
+	activeShader->Use();
+	quad->bind();
+	activeShader->setVec4("color", color);
+	activeShader->setBool("isInstanced", true);	
+	for (size_t i = 0; i < instanceCount; i++)
+	{		
+		glm::mat4 m(1);
+		m = glm::translate(m, glm::vec3(positions[i], 0.0));
+		activeShader->setMat4("models(" + std::to_string(i) + ")", m);
+	}
+	activeShader->setMat4("view", activeCamera->getView());
+	drawElementsInstanced(6, instanceCount);
+	quad->unbind();
 }
 
 //this creates GLText every time u call it, prefer using the other version and pass in GLText
@@ -170,9 +183,14 @@ void Renderer::Swap()
 	SDL_GL_SwapWindow(SDL_GL_GetCurrentWindow());
 }
 
-void Renderer::drawArrays(GLsizei n)
+void Renderer::drawElements(GLsizei count)
 {
-	glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+}
+
+void Renderer::drawElementsInstanced(GLsizei count, GLsizei instancecount)
+{
+	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0, instancecount);
 }
 
 void Renderer::setCamera(Camera* camera)
