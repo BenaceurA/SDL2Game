@@ -30,6 +30,7 @@ void Game::init() {
 	renderer->init();
 	Input::init(&state);
 	renderer->setClearColor(0.f, 0.f, 0.f, 1.f);
+	text = gltCreateText();
 }
 
 void Game::destroy() {
@@ -40,13 +41,17 @@ void Game::destroy() {
 
 void Game::run()
 {
-	//TEXT TESTING
-	GLTtext* text = gltCreateText();
+	//logging
+	GLint maxVertexComponents;
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxVertexComponents);
+	std::cout << "max vertex uniform components : " << std::to_string(maxVertexComponents).c_str();
 
-	const int mapWidth = 10;
+	//create a map
+	const int mapWidth = 20;
 	const int mapHeight = 10;
 	Map map(mapWidth, mapHeight);
 	map.generateHeightMap();
+
 	while (state.running)
 	{
 		Input::pollEvents(); // polls events and updates the input state
@@ -65,8 +70,8 @@ void Game::run()
 
 		//DRAW START
 		
-		int nDraw = 0;
-		std::vector<glm::vec2> positions;
+		int nDraws = 0;
+		std::vector<glm::vec2> positionsOfQuadsToDraw;
 		//loop the map and get all the visible tile positions
 		for (float i = 0; i < mapWidth * tq->getWidth(); i+=tq->getWidth())
 		{
@@ -108,15 +113,15 @@ void Game::run()
 				}
 				if (!xAxisHidden && !yAxisHidden)
 				{
-					positions.push_back({ i,j });
-					nDraw++;
+					positionsOfQuadsToDraw.push_back({ i,j });
+					nDraws++;
 				}
 			}
 		}
-		renderer->drawQuadInstanced(tq, positions, { 1.0,1.0,0.0,1.0 },positions.size());
+		renderer->drawQuadInstanced(tq, positionsOfQuadsToDraw, { 1.0,1.0,0.0,1.0 }, positionsOfQuadsToDraw.size());
 
-		//text draw
-		gltSetText(text, std::to_string(nDraw).c_str());
+		//TEXT
+		gltSetText(text, std::to_string(nDraws).c_str());
 		renderer->drawText(text, glm::vec2(0, 0), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
 
 		//SWAP THE CANVAS

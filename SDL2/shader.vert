@@ -8,7 +8,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 uniform bool isInstanced = false;
-uniform mat4 models[100];
+uniform mat4 models[252];
 
 out vec2 TexCoord;
 

@@ -13,6 +13,7 @@ public:
 	void destroy();
 private:
 	static Game* game;
-	Renderer* renderer;
-	GameState state;
+	Renderer* renderer; //used to render to the window using opengl
+	GLTtext* text; //used to setup a text for rendering
+	GameState state; //holds some garbage
 };

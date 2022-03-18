@@ -108,10 +108,6 @@ void Renderer::drawQuad(const Quad* quad, glm::vec2 position, Texture* texture)
 
 void Renderer::drawQuadInstanced(const Quad* quad, std::vector<glm::vec2> positions, glm::vec4 color, int instanceCount)
 {
-	if (instanceCount>100)
-	{
-		throwRTExcept("instanceCount can't exceed 100 for now :)");
-	}
 	activeShader->Use();
 	quad->bind();
 	activeShader->setVec4("color", color);
@@ -120,7 +116,7 @@ void Renderer::drawQuadInstanced(const Quad* quad, std::vector<glm::vec2> positi
 	{		
 		glm::mat4 m(1);
 		m = glm::translate(m, glm::vec3(positions[i], 0.0));
-		activeShader->setMat4("models(" + std::to_string(i) + ")", m);
+		activeShader->setMat4("models[" + std::to_string(i) + "]", m);
 	}
 	activeShader->setMat4("view", activeCamera->getView());
 	drawElementsInstanced(6, instanceCount);

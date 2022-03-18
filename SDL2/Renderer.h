@@ -21,8 +21,8 @@ class Renderer
 public:
 
 	static Renderer* createInstance();
-	static Renderer* getInstance();
-	void init();
+	static Renderer* getInstance();	
+	void init();//initializes opengl,camera and shaders
 	void destroy();
 	void setClearColor(float r, float g , float b , float a);
 	const ShaderProgram* getShader();
