@@ -47,11 +47,22 @@ void Game::run()
 	std::cout << "max vertex uniform components : " << std::to_string(maxVertexComponents).c_str();
 
 	//create a map
-	const int mapWidth = 64;
-	const int mapHeight = 64;
+	const int mapWidth = 400;
+	const int mapHeight = 400;
 	Map map(mapWidth, mapHeight);
 	map.generateHeightMap();
 
+	int nDraws = 0;
+	std::vector<glm::vec2> positionsOfQuadsToDraw;
+	Quad* tq = &renderer->quads->tileQuad;
+	for (float i = 0; i < mapWidth * tq->getWidth(); i += tq->getWidth())
+	{
+		for (float j = 0; j < mapHeight * tq->getHeight(); j += tq->getHeight())
+		{
+			nDraws++;
+			positionsOfQuadsToDraw.push_back({ i,j });
+		}
+	}
 	while (state.running)
 	{
 		Input::pollEvents(); // polls events and updates the input state
@@ -65,54 +76,54 @@ void Game::run()
 		//CLEAR CANVAS
 		renderer->clear();
 
-		Quad* tq = &renderer->quads->tileQuad;
-		Quad* bq = &renderer->quads->bigQuad;
+
 
 		//DRAW START
 		
-		int nDraws = 0;
-		std::vector<glm::vec2> positionsOfQuadsToDraw;
+
+
 		//loop the map and get all the visible tile positions
-		for (float i = 0; i < mapWidth * tq->getWidth(); i+=tq->getWidth())
-		{
-			for (float j = 0; j < mapHeight * tq->getHeight(); j+=tq->getHeight())
-			{
-				//get world vertex positions
-				glm::vec2 pos[4];
-				pos[0] = { i,j };
-				pos[1] = { i+tq->getWidth(),j };
-				pos[2] = { i+tq->getWidth(),j+tq->getHeight() };
-				pos[3] = { i,j+tq->getWidth() };
+		//for (float i = 0; i < mapWidth * tq->getWidth(); i+=tq->getWidth())
+		//{
+		//	for (float j = 0; j < mapHeight * tq->getHeight(); j+=tq->getHeight())
+		//	{
+		//		//get world vertex positions
+		//		glm::vec2 pos[4];
+		//		pos[0] = { i,j };
+		//		pos[1] = { i+tq->getWidth(),j };
+		//		pos[2] = { i+tq->getWidth(),j+tq->getHeight() };
+		//		pos[3] = { i,j+tq->getWidth() };
 
-				//tranform into screenPos
-				glm::vec4 screenPos[4];
-				for (size_t k = 0; k < 4; k++)
-				{
-					screenPos[k] = renderer->getCamera()->getProjection() * renderer->getCamera()->getView() * glm::vec4(pos[k], 0.0, 1.0);
-					screenPos[k] /= screenPos[k].w;
-				}
+		//		//tranform into screenPos
+		//		glm::vec4 screenPos[4];
+		//		for (size_t k = 0; k < 4; k++)
+		//		{
+		//			screenPos[k] = renderer->getCamera()->getProjection() * renderer->getCamera()->getView() * glm::vec4(pos[k], 0.0, 1.0);
+		//			screenPos[k] /= screenPos[k].w;
+		//		}
 
-				//check the quad is hidden
-				bool xAxisHidden = true;
-				bool yAxisHidden = true;
-				for (size_t l = 0; l < 4; l++)
-				{
-					if (screenPos[l].x > -1.0f && screenPos[l].x < 1.0f)
-					{
-						xAxisHidden = false;
-					}
-					if (screenPos[l].y > -1.0f && screenPos[l].y < 1.0f)
-					{
-						yAxisHidden = false;
-					}
-				}
-				if (!xAxisHidden && !yAxisHidden)
-				{
-					positionsOfQuadsToDraw.push_back({ i,j });
-					nDraws++;
-				}
-			}
-		}
+		//		//check the quad is hidden
+		//		bool xAxisHidden = true;
+		//		bool yAxisHidden = true;
+		//		for (size_t l = 0; l < 4; l++)
+		//		{
+		//			if (screenPos[l].x > -1.0f && screenPos[l].x < 1.0f)
+		//			{
+		//				xAxisHidden = false;
+		//			}
+		//			if (screenPos[l].y > -1.0f && screenPos[l].y < 1.0f)
+		//			{
+		//				yAxisHidden = false;
+		//			}
+		//		}
+		//		if (!xAxisHidden && !yAxisHidden)
+		//		{
+		//			positionsOfQuadsToDraw.push_back({ i,j });
+		//			/*renderer->drawQuad(tq, { i,j }, { 1.0,1.0,0.0,1.0 });*/
+		//			nDraws++;
+		//		}
+		//	}
+		//}
 		renderer->drawQuadInstanced(tq, positionsOfQuadsToDraw, { 1.0,1.0,0.0,1.0 }, positionsOfQuadsToDraw.size());
 
 		//TEXT

@@ -39,7 +39,7 @@ void Renderer::init()
 	initText();
 
 	//Camera and Shader shouldn't be created here.
-	activeCamera = new Camera{ {0.0f,0.0f},Window::resolution.x / Window::resolution.y,10.0f }; 
+	activeCamera = new Camera{ {0.0f,0.0f},Window::resolution.x / Window::resolution.y,50.0f }; 
 	activeShader = new ShaderProgram{ "shader.vert", "shader.frag" };
 
 	activeShader->Use();

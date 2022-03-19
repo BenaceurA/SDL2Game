@@ -13,6 +13,6 @@ public:
 private:
 	float aspect;
 	float zoom;
-	float speed = 0.15f;
+	float speed = 1.15f;
 	virtual void inputCallBack() override;
 };
