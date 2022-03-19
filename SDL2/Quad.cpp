@@ -14,6 +14,11 @@ void Quad::unbind() const
 	bufferManager.unbind();
 }
 
+void Quad::addInstancedAttribute(const void* pAttribute, GLsizei byteSize) const
+{
+	bufferManager.addInstancedAttribute(pAttribute, byteSize);
+}
+
 float Quad::getWidth()
 {
 	return width;

@@ -110,10 +110,12 @@ void Renderer::drawQuadInstanced(const Quad* quad, std::vector<glm::vec2> positi
 {
 	activeShader->Use();
 	quad->bind();
+	//add per instance attribute to the quad here (position)
+	quad->addInstancedAttribute(positions.data(), positions.size()*sizeof(float)*2);
 	activeShader->setVec4("color", color);
 	activeShader->setBool("isInstanced", true);	
 	for (size_t i = 0; i < instanceCount; i++)
-	{		
+	{
 		glm::mat4 m(1);
 		m = glm::translate(m, glm::vec3(positions[i], 0.0));
 		activeShader->setMat4("models[" + std::to_string(i) + "]", m);

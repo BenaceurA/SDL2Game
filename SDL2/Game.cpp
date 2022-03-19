@@ -47,8 +47,8 @@ void Game::run()
 	std::cout << "max vertex uniform components : " << std::to_string(maxVertexComponents).c_str();
 
 	//create a map
-	const int mapWidth = 20;
-	const int mapHeight = 10;
+	const int mapWidth = 64;
+	const int mapHeight = 64;
 	Map map(mapWidth, mapHeight);
 	map.generateHeightMap();
 
@@ -100,15 +100,10 @@ void Game::run()
 					if (screenPos[l].x > -1.0f && screenPos[l].x < 1.0f)
 					{
 						xAxisHidden = false;
-						break;
 					}
-				}
-				for (size_t l = 0; l < 4; l++)
-				{
 					if (screenPos[l].y > -1.0f && screenPos[l].y < 1.0f)
 					{
 						yAxisHidden = false;
-						break;
 					}
 				}
 				if (!xAxisHidden && !yAxisHidden)
