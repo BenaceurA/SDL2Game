@@ -6,6 +6,7 @@
 #include "Input.h"
 #include <iostream>
 #include "Map.h"
+#include <chrono>
 
 Game* Game::game = nullptr;
 
@@ -41,30 +42,22 @@ void Game::destroy() {
 
 void Game::run()
 {
+	std::chrono::duration<double> elapsed_seconds;
 	//logging
 	GLint maxVertexComponents;
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxVertexComponents);
 	std::cout << "max vertex uniform components : " << std::to_string(maxVertexComponents).c_str();
 
-	//create a map
-	const int mapWidth = 400;
-	const int mapHeight = 400;
-	Map map(mapWidth, mapHeight);
-	map.generateHeightMap();
-
 	int nDraws = 0;
-	std::vector<glm::vec2> positionsOfQuadsToDraw;
+	
 	Quad* tq = &renderer->quads->tileQuad;
-	for (float i = 0; i < mapWidth * tq->getWidth(); i += tq->getWidth())
-	{
-		for (float j = 0; j < mapHeight * tq->getHeight(); j += tq->getHeight())
-		{
-			nDraws++;
-			positionsOfQuadsToDraw.push_back({ i,j });
-		}
-	}
+
+	glm::vec2 playerPosition = { 0, 3 };
+	float drawDistance = 48;
+
 	while (state.running)
 	{
+		auto start = std::chrono::steady_clock::now();
 		Input::pollEvents(); // polls events and updates the input state
 		Input::resolveCallBacks(); // call all registred callbacks and executes based on the input state
 
@@ -77,61 +70,40 @@ void Game::run()
 		renderer->clear();
 
 
+		glm::vec2 startCoord = playerPosition - drawDistance;
+		glm::vec2 EndCoord = playerPosition + drawDistance; 
+		std::vector<glm::vec2> positionsOfQuadsToDraw;
+
+		for (int i = (int)startCoord.x; i < (int)EndCoord.x; i++)
+		{
+			for (int j = (int)startCoord.y; j < (int)EndCoord.y; j++)
+			{
+				if (i != playerPosition.x || j != playerPosition.y)
+				{
+					positionsOfQuadsToDraw.push_back(glm::vec2{ i,j });
+				}
+			}
+		}
 
 		//DRAW START
 		
-
-
-		//loop the map and get all the visible tile positions
-		//for (float i = 0; i < mapWidth * tq->getWidth(); i+=tq->getWidth())
-		//{
-		//	for (float j = 0; j < mapHeight * tq->getHeight(); j+=tq->getHeight())
-		//	{
-		//		//get world vertex positions
-		//		glm::vec2 pos[4];
-		//		pos[0] = { i,j };
-		//		pos[1] = { i+tq->getWidth(),j };
-		//		pos[2] = { i+tq->getWidth(),j+tq->getHeight() };
-		//		pos[3] = { i,j+tq->getWidth() };
-
-		//		//tranform into screenPos
-		//		glm::vec4 screenPos[4];
-		//		for (size_t k = 0; k < 4; k++)
-		//		{
-		//			screenPos[k] = renderer->getCamera()->getProjection() * renderer->getCamera()->getView() * glm::vec4(pos[k], 0.0, 1.0);
-		//			screenPos[k] /= screenPos[k].w;
-		//		}
-
-		//		//check the quad is hidden
-		//		bool xAxisHidden = true;
-		//		bool yAxisHidden = true;
-		//		for (size_t l = 0; l < 4; l++)
-		//		{
-		//			if (screenPos[l].x > -1.0f && screenPos[l].x < 1.0f)
-		//			{
-		//				xAxisHidden = false;
-		//			}
-		//			if (screenPos[l].y > -1.0f && screenPos[l].y < 1.0f)
-		//			{
-		//				yAxisHidden = false;
-		//			}
-		//		}
-		//		if (!xAxisHidden && !yAxisHidden)
-		//		{
-		//			positionsOfQuadsToDraw.push_back({ i,j });
-		//			/*renderer->drawQuad(tq, { i,j }, { 1.0,1.0,0.0,1.0 });*/
-		//			nDraws++;
-		//		}
-		//	}
-		//}
 		renderer->drawQuadInstanced(tq, positionsOfQuadsToDraw, { 1.0,1.0,0.0,1.0 }, positionsOfQuadsToDraw.size());
 
 		//TEXT
-		gltSetText(text, std::to_string(nDraws).c_str());
+		gltSetText
+		(
+			text, 
+			(std::string("frame time : ") + 
+			 std::to_string(elapsed_seconds.count()) +
+			 std::string("s")
+			).c_str()
+		);
 		renderer->drawText(text, glm::vec2(0, 0), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
 
 		//SWAP THE CANVAS
 		renderer->Swap();
+		auto end = std::chrono::steady_clock::now();
+		elapsed_seconds = end - start;
 	}
 
 	gltDeleteText(text);
