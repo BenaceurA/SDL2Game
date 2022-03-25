@@ -82,6 +82,8 @@ void Renderer::drawQuad(const Quad* quad, glm::vec2 position, glm::vec4 color)
 { 
 	activeShader->Use();
 	quad->bind();
+	activeShader->setBool("isInstanced", false);
+	activeShader->setBool("hasTexture", false);
 	activeShader->setVec4("color",color); //color
 	glm::mat4 m(1);
 	m = glm::translate(m, glm::vec3(position, 0.0));
@@ -96,6 +98,7 @@ void Renderer::drawQuad(const Quad* quad, glm::vec2 position, Texture* texture)
 	activeShader->Use();
 	quad->bind();
 	texture->bind(0);
+	activeShader->setBool("isInstanced", false);
 	activeShader->setInt("texture01", 0);
 	activeShader->setBool("hasTexture", true); //hasTexture
 	glm::mat4 m(1);
@@ -113,7 +116,8 @@ void Renderer::drawQuadInstanced(const Quad* quad, std::vector<glm::vec2> positi
 	//add per instance attribute to the quad here (position)
 	quad->addInstancedAttribute(positions.data(), positions.size()*sizeof(float)*2);
 	activeShader->setVec4("color", color);
-	activeShader->setBool("isInstanced", true);	
+	activeShader->setBool("isInstanced", true);
+	activeShader->setBool("hasTexture", false);
 	for (size_t i = 0; i < instanceCount; i++)
 	{
 		glm::mat4 m(1);

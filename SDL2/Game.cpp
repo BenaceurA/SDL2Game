@@ -52,7 +52,7 @@ void Game::run()
 	
 	Quad* tq = &renderer->quads->tileQuad;
 
-	glm::vec2 playerPosition = { 0, 3 };
+	glm::vec2 playerPosition = { 0, 0 };
 	float drawDistance = 48;
 
 	while (state.running)
@@ -69,26 +69,39 @@ void Game::run()
 		//CLEAR CANVAS
 		renderer->clear();
 
+		playerPosition = renderer->getCamera()->position;
 
 		glm::vec2 startCoord = playerPosition - drawDistance;
 		glm::vec2 EndCoord = playerPosition + drawDistance; 
-		std::vector<glm::vec2> positionsOfQuadsToDraw;
-
+		std::vector<glm::vec2> positionsOfGreenQuadsToDraw;
+		std::vector<glm::vec2> positionsOfBlueQuadsToDraw;
+		std::vector<glm::vec2> positionsOfGreyQuadsToDraw;
 		for (int i = (int)startCoord.x; i < (int)EndCoord.x; i++)
 		{
 			for (int j = (int)startCoord.y; j < (int)EndCoord.y; j++)
 			{
-				if (i != playerPosition.x || j != playerPosition.y)
+				double height = Map::getHeightAtLocation(i, j);
+
+				if (height < 0.30f)
 				{
-					positionsOfQuadsToDraw.push_back(glm::vec2{ i,j });
+					positionsOfBlueQuadsToDraw.push_back(glm::vec2{ i,j });
+				}
+				else if (height > 0.30f && height < 0.65f)
+				{
+					positionsOfGreenQuadsToDraw.push_back(glm::vec2{ i,j });
+				}
+				else if (height > 0.65f) {
+					positionsOfGreyQuadsToDraw.push_back(glm::vec2{ i,j });
 				}
 			}
 		}
 
 		//DRAW START
 		
-		renderer->drawQuadInstanced(tq, positionsOfQuadsToDraw, { 1.0,1.0,0.0,1.0 }, positionsOfQuadsToDraw.size());
-
+		renderer->drawQuadInstanced(tq, positionsOfBlueQuadsToDraw, { 0.0,0.0,1.0,1.0 }, positionsOfBlueQuadsToDraw.size());
+		renderer->drawQuadInstanced(tq, positionsOfGreenQuadsToDraw, { 0.0,1.0,0.0,1.0 }, positionsOfGreenQuadsToDraw.size());
+		renderer->drawQuadInstanced(tq, positionsOfGreyQuadsToDraw, { 0.5,0.5,0.5,1.0 }, positionsOfGreyQuadsToDraw.size());
+		renderer->drawQuad(tq,  playerPosition , { 1.0,1.0,1.0,1.0 });
 		//TEXT
 		gltSetText
 		(
@@ -100,6 +113,14 @@ void Game::run()
 		);
 		renderer->drawText(text, glm::vec2(0, 0), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
 
+		gltSetText
+		(
+			text,
+			(std::string("player position : ") +
+			 std::to_string(playerPosition.x) + " " + std::to_string(playerPosition.y)
+			).c_str()
+		);
+		renderer->drawText(text, glm::vec2(0, 12), glm::vec4(1.0, 1.0, 1.0, 1.0), 1.0, true);
 		//SWAP THE CANVAS
 		renderer->Swap();
 		auto end = std::chrono::steady_clock::now();
